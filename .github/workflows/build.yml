@@ -1,0 +1,30 @@
+name: Build JAR from ZIP
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Extract ZIP
+      run: unzip *.zip -d source_code
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+        
+    - name: Build Maven Project
+      run: |
+        cd source_code
+        POM_DIR=$(dirname $(find . -name "pom.xml" | head -n 1))
+        cd $POM_DIR
+        mvn clean package
+        
+    - name: Upload JAR
+      uses: actions/upload-artifact@v4
+      with:
+        name: HexnaAuth-Plugin
+        path: source_code/**/target/*.jar
